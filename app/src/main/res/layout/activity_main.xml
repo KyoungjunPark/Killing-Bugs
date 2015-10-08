@@ -18,6 +18,7 @@
         android:layout_alignParentBottom="true"
         android:src="@drawable/left_arrow"
         android:contentDescription="@string/left_arrow"
+        android:background="@android:color/transparent"
         android:id="@+id/leftButton"
         />
     <com.example.parkk.mobile_proj1.GraphicsView
@@ -38,6 +39,7 @@
         android:layout_alignParentBottom="true"
         android:src="@drawable/right_arrow"
         android:contentDescription="@string/right_arrow"
+        android:background="@android:color/transparent"
         android:id="@+id/rightButton"
         />
 
