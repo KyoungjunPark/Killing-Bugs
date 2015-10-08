@@ -6,27 +6,22 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 /**
  * Created by KJPARK on 2015-10-08.
  */
 public class BugsSpray {
     private static final String TAG ="BugsSpray";
-    private Bitmap sprayImage;
+    private Bitmap sprayBitmap;
     private Context mContext;
 
-    private int screen_width;
-    private int screen_height;
 
     private int width;
     private int height;
 
-    private int pivot_x;
-    private int pivot_y;
+    private int circle_x;
+    private int circle_y;
 
     private int x;
     private int y;
@@ -42,27 +37,25 @@ public class BugsSpray {
     }
     private void initialize()
     {
-        sprayImage = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.bug_spray);
-        width = sprayImage.getWidth();
-        height = sprayImage.getHeight();
+        sprayBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.bug_spray);
+        width = sprayBitmap.getWidth();
+        height = sprayBitmap.getHeight();
 
         //matrix = new Matrix();
     }
     public void draw(Canvas canvas)
     {
-        Log.d(TAG, "x:" + x + "/" + "y:" + y + "angle:" + currentSelfAngle);
-        canvas.rotate(currentSelfAngle, x, y + height / 2);
-        canvas.drawBitmap(sprayImage, x, y + height / 2 + 70, new Paint());
+        Log.d(TAG, "circle_x:" + circle_x + "/" + "circle_y:"
+                + circle_y + "angle:" + currentSelfAngle);
+        canvas.save();
+        canvas.rotate(currentSelfAngle, circle_x, circle_y);
+        canvas.drawBitmap(sprayBitmap, x, y + height / 2 + 70, new Paint());
+        canvas.restore();
     }
-    public void setScreenSize(int width, int height)
+    public void setCircleCenter(int circle_x, int circle_y)
     {
-        screen_width = width;
-        screen_height = height;
-    }
-    public void setPivot(int pivot_x, int pivot_y)
-    {
-        this.pivot_x = pivot_x;
-        this.pivot_y = pivot_y;
+        this.circle_x = circle_x;
+        this.circle_y = circle_y;
     }
     public void setInitialPosition(int x, int y)
     {
@@ -71,11 +64,11 @@ public class BugsSpray {
     }
     public void moveRight()
     {
-        currentSelfAngle += 2;
+        currentSelfAngle -= 6;
     }
     public void moveLeft()
     {
-        currentSelfAngle -= 2;
+        currentSelfAngle += 6;
     }
 
 

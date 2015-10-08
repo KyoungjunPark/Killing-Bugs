@@ -50,28 +50,28 @@ public class GraphicsView extends View{
                 screen_width = getWidth();
                 screen_height = getHeight();
 
-                circle_x = screen_width/2;
-                circle_y = screen_height/2;
+                circle_x = screen_width / 2;
+                circle_y = screen_height / 2;
 
-                radius = Math.min(screen_width, screen_height)/2 - 100;
-                Log.d(TAG,"first :"+circle_x+"/"+circle_y);
-                Log.d(TAG, "two :" + (location[0]) + "/" + (location[1]));
+                radius = Math.min(screen_width, screen_height) / 2 - 100;
+                Log.d(TAG, "first :" + circle_x + "/" + circle_y + "/" + radius);
+                Log.d(TAG, "two :" + (getLeft()) + "/" + (getTop()));
                 Log.d(TAG, "three :" + screen_width + "/" + screen_height);
 
-                bugsSpray.setPivot(location[0], location[1]);
-                bugsSpray.setInitialPosition(location[0], location[1]+radius);
+                bugsSpray.setInitialPosition(location[0], location[1] + radius);
+                bugsSpray.setCircleCenter(circle_x, circle_y);
 
                 getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
         /* BugsSpray initialization */
         bugsSpray = new BugsSpray(getContext());
-        bugsSpray.setScreenSize(screen_width, screen_height);
     }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //circle border
+        Log.d(TAG, "FUCK :"+getWidth()/2 + "/"+getHeight()/2);
         canvas.drawCircle(circle_x, circle_y, radius, circlePaint);
 
         bugsSpray.draw(canvas);

@@ -29,19 +29,18 @@ public class MainActivity extends AppCompatActivity {
         rightButton = (ImageButton) findViewById(R.id.rightButton);
         screen_circle = (GraphicsView) findViewById(R.id.screen_circle);
 
-        leftButton.setOnClickListener(new View.OnClickListener() {
+        leftButton.setOnTouchListener(new RepeatListener(400, 100, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 screen_circle.sprayLeft();
             }
-        });
-        rightButton.setOnClickListener(new View.OnClickListener() {
+        }));
+        rightButton.setOnTouchListener(new RepeatListener(400, 100, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 screen_circle.sprayRight();
             }
-        });
-
+        }));
     }
 
     @Override
