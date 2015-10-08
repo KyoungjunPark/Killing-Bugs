@@ -5,8 +5,7 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    android:paddingBottom="@dimen/activity_vertical_margin">
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -21,14 +20,18 @@
         android:background="@android:color/transparent"
         android:id="@+id/leftButton"
         />
+
     <com.example.parkk.mobile_proj1.GraphicsView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
+        android:layout_marginBottom="30dp"
         android:layout_toEndOf="@+id/leftButton"
         android:layout_toStartOf="@+id/rightButton"
         android:layout_toRightOf="@+id/leftButton"
-        android:layout_toLeftOf="@+id/rightButton" />
+        android:layout_toLeftOf="@+id/rightButton"
+        android:id="@+id/screen_circle"
+        />
+
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

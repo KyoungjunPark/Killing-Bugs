@@ -5,9 +5,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -15,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageButton leftButton;
     private ImageButton rightButton;
+    private GraphicsView screen_circle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +27,20 @@ public class MainActivity extends AppCompatActivity {
 
         leftButton = (ImageButton) findViewById(R.id.leftButton);
         rightButton = (ImageButton) findViewById(R.id.rightButton);
+        screen_circle = (GraphicsView) findViewById(R.id.screen_circle);
 
-
-
+        leftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                screen_circle.sprayLeft();
+            }
+        });
+        rightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                screen_circle.sprayRight();
+            }
+        });
 
     }
 
