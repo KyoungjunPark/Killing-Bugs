@@ -58,7 +58,7 @@ public class GraphicsView extends View{
                 circle_x = screen_width / 2;
                 circle_y = screen_height / 2;
 
-                radius = Math.min(screen_width, screen_height) / 2 - 100;
+                radius = Math.min(screen_width, screen_height) / 2 - 40;
 
                 bugsSpray.setInitialPosition(circle_x, circle_y+radius);
                 bugsSpray.setCircleCenter(circle_x, circle_y, radius);

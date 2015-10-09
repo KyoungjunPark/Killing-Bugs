@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ public class BugsSprayBullet {
     private static final String TAG ="BugsSprayBullet";
 
     private Bitmap bulletBitmap;
+    private Bitmap rotatedBulletBitmap;
     private float x;
     private float y;
 
@@ -47,5 +49,12 @@ public class BugsSprayBullet {
     {
         this.x = x;
         this.y = y;
+    }
+    public void setRotation(Matrix matrix)
+    {
+        rotatedBulletBitmap = Bitmap.createBitmap(bulletBitmap, 0, 0, bulletBitmap.getWidth(), bulletBitmap.getHeight(), matrix, true);
+
+        width = rotatedBulletBitmap.getWidth();
+        height = rotatedBulletBitmap.getHeight();
     }
 }

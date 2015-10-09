@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -18,22 +17,34 @@ import java.util.ArrayList;
 public class BugsSpray {
     private static final String TAG ="BugsSpray";
     private Bitmap sprayBitmap;
+    private Bitmap rotatedSprayBitmap;
+
+    private Bitmap particlesBitmap;
+    private Bitmap rotatedParticlesBitmap;
+
     private Context mContext;
 
-    private int width;
-    private int height;
+    private int spray_width;
+    private int spray_height;
 
+    private int particles_width;
+    private int particles_height;
     private int circle_x;
     private int circle_y;
     private int circle_radius;
-    private float x;
-    private float y;
+    private float spray_x;
+    private float spray_y;
+
+    private float particle_x;
+    private float particle_y;
+
 
     private int currentAngle = 0;
+    private int rotateAngle = 0;
     private int angleSize = 6;
     private boolean isRotated = false;
 
-    private Path spray_path;
+    //private Path spray_path;
 
     private ArrayList<BugsSprayBullet> bullets;
 
@@ -47,47 +58,65 @@ public class BugsSpray {
     {
         sprayBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.bug_spray);
 
-        width = sprayBitmap.getWidth();
-        height = sprayBitmap.getHeight();
+        spray_width = sprayBitmap.getWidth();
+        spray_height = sprayBitmap.getHeight();
+
+        particlesBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.spray_particles);
+        particles_width = particlesBitmap.getWidth();
+        particles_height = particlesBitmap.getHeight();
 
         bullets = new ArrayList<>();
+        //spray_path = new Path();
 
-        spray_path = new Path();
-        //new BulletShootTask().execute();
+        new BulletShootTask().execute();
     }
     public void draw(Canvas canvas)
     {
         float newX;
         float newY;
-        Bitmap tmp;
 
         if(isRotated) {
-            Log.d(TAG,"before : "+x+"/"+y);
-            newX = getNew_X();
-            newY = getNew_Y();
-            x = newX;
-            y = newY;
-            Log.d(TAG, "new : " + newX + "/" + newY);
+            newX = getNewSpray_X(spray_x, spray_y);
+            newY = getNewSpray_Y(spray_x, spray_y);
+            spray_x = newX;
+            spray_y = newY;
 
+            newX = getNewSpray_X(particle_x, particle_y);
+            newY = getNewSpray_Y(particle_x, particle_y);
+            particle_x = newX;
+            particle_y = newY;
+
+            //rotate spray
             Matrix matrix = new Matrix();
-            matrix.postRotate(angleSize);
-            tmp = sprayBitmap;
+            matrix.postRotate(currentAngle);
 
-            sprayBitmap = Bitmap.createBitmap(tmp, 0, 0, sprayBitmap.getWidth(), sprayBitmap.getHeight(), matrix, true);
-            tmp.recycle();
-            width = sprayBitmap.getWidth();
-            height = sprayBitmap.getHeight();
+            rotatedSprayBitmap = Bitmap.createBitmap(sprayBitmap, 0, 0, sprayBitmap.getWidth(), sprayBitmap.getHeight(), matrix, true);
+
+            spray_width = rotatedSprayBitmap.getWidth();
+            spray_height = rotatedSprayBitmap.getHeight();
+
+            //rotate particles
+            rotatedParticlesBitmap = Bitmap.createBitmap(particlesBitmap, 0, 0, particlesBitmap.getWidth(), particlesBitmap.getHeight(), matrix, true);
+
+            particles_width = rotatedParticlesBitmap.getWidth();
+            particles_height = rotatedParticlesBitmap.getHeight();
 
             isRotated = false;
         }
         //draw the spray
-        canvas.drawBitmap(sprayBitmap, x-width/2, y-height/2, new Paint());
+        if(rotatedSprayBitmap == null) canvas.drawBitmap(sprayBitmap, spray_x - spray_width / 2, spray_y - spray_height / 2, new Paint());
+        else canvas.drawBitmap(rotatedSprayBitmap, spray_x - spray_width / 2, spray_y - spray_height / 2, new Paint());
+
+        if(rotatedParticlesBitmap == null) canvas.drawBitmap(particlesBitmap, particle_x - particles_width/2, particle_y-particles_height/2, new Paint());
+        else canvas.drawBitmap(rotatedParticlesBitmap, particle_x - particles_width/2, particle_y -particles_height/2, new Paint());
 
         //draw the bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).draw(canvas);
         }
+        
     }
+
     public void setCircleCenter(int circle_x, int circle_y, int circle_radius)
     {
         this.circle_x = circle_x;
@@ -98,32 +127,37 @@ public class BugsSpray {
     }
     public void setInitialPosition(int x, int y)
     {
-        this.x = x;
-        this.y = y;
+        this.spray_x = x;
+        this.spray_y = y;
+
+        this.particle_x = x +50;
+        this.particle_y = y - particles_height/2;
     }
     public void moveRight()
     {
         angleSize = -6;
         currentAngle += angleSize;
         isRotated = true;
+        rotateAngle -= 6;
     }
     public void moveLeft()
     {
         angleSize = 6;
         currentAngle += angleSize;
         isRotated = true;
+        rotateAngle += 6;
     }
-    private float getNew_X()
+    private float getNewSpray_X(float x, float y)
     {
         double tmpX = x - circle_x;
         double tmpY = y - circle_y;
-        Log.d(TAG,"tmpX : "+tmpX+"/"+tmpY);
+
         double radianAngle = (double)angleSize*(Math.PI)/180;
         double newX = tmpX*Math.cos(radianAngle) - tmpY*Math.sin(radianAngle);
         //double newX = circle_radius * Math.sqrt((tmpX*tmpX)/((tmpX*tmpX)+(tmpY*tmpY)));
         return (float)newX+ circle_x;
     }
-    private float getNew_Y()
+    private float getNewSpray_Y(float x, float y)
     {
         double tmpX = x - circle_x;
         double tmpY = y - circle_y;
@@ -137,14 +171,19 @@ public class BugsSpray {
     {
 
     }
-    public class BulletShootTask extends AsyncTask<Void, Void, Void>{
+
+    public class BulletShootTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
             while(true) {
                 //draw the bullet
                 BugsSprayBullet bullet = new BugsSprayBullet(mContext);
-                bullet.setPosition(x + 40, y);
+                bullet.setPosition(spray_x + 40, spray_y);
+
+                Matrix matrix = new Matrix();
+                matrix.postRotate(currentAngle);
+                bullet.setRotation(matrix);
                 bullets.add(bullet);
 
                 try {
