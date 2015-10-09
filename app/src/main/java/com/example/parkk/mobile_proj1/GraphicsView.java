@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +22,8 @@ public class GraphicsView extends View{
     private int circle_x;
     private int circle_y;
     private int radius;
+
+    private Path circle_path;
 
 
     private BugsSpray bugsSpray;
@@ -42,6 +45,8 @@ public class GraphicsView extends View{
         circlePaint.setColor(Color.MAGENTA);
         circlePaint.setAntiAlias(true);
 
+        circle_path = new Path();
+
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -54,13 +59,11 @@ public class GraphicsView extends View{
                 circle_y = screen_height / 2;
 
                 radius = Math.min(screen_width, screen_height) / 2 - 100;
-                Log.d(TAG, "first :" + circle_x + "/" + circle_y + "/" + radius);
-                Log.d(TAG, "two :" + (getLeft()) + "/" + (getTop()));
-                Log.d(TAG, "three :" + screen_width + "/" + screen_height);
 
-                bugsSpray.setInitialPosition(location[0], location[1] + radius);
-                bugsSpray.setCircleCenter(circle_x, circle_y);
+                bugsSpray.setInitialPosition(circle_x, circle_y+radius);
+                bugsSpray.setCircleCenter(circle_x, circle_y, radius);
 
+                circle_path.addCircle(circle_x, circle_y, radius, Path.Direction.CW);
                 getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
@@ -71,13 +74,12 @@ public class GraphicsView extends View{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //circle border
-        Log.d(TAG, "FUCK :"+getWidth()/2 + "/"+getHeight()/2);
-        canvas.drawCircle(circle_x, circle_y, radius, circlePaint);
+        //canvas.drawCircle(circle_x, circle_y, radius, circlePaint);
 
+        canvas.drawPath(circle_path, circlePaint);
         bugsSpray.draw(canvas);
 
-
-        //invalidate();
+        invalidate();
     }
     public void sprayLeft() {
         bugsSpray.moveLeft();
