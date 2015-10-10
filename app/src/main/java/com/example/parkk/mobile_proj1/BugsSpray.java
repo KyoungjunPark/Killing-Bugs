@@ -114,7 +114,7 @@ public class BugsSpray {
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).draw(canvas);
         }
-        
+
     }
 
     public void setCircleCenter(int circle_x, int circle_y, int circle_radius)
