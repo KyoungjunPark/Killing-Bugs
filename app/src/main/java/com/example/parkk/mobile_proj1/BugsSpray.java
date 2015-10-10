@@ -125,13 +125,16 @@ public class BugsSpray {
         //refresh bullets
         for(Iterator<BugsSprayBullet> iterator = bullets.iterator() ; iterator.hasNext();){
             BugsSprayBullet bullet = iterator.next();
-            if(isOut(bullet)) iterator.remove();
+            if(isOut(bullet)) {
+                bullet.remove();
+                iterator.remove();
+            }
         }
         //draw the bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).draw(canvas);
         }
-        
+
     }
 
     public void setCircleCenter(int circle_x, int circle_y, int circle_radius)
@@ -181,7 +184,6 @@ public class BugsSpray {
     {
         double tmpX = x - circle_x;
         double tmpY = y - circle_y;
-        Log.d(TAG,"tmpY : "+tmpX+"/"+tmpY);
         double radianAngle = (double)angleSize*(Math.PI)/180;
         double newY = tmpX*Math.sin(radianAngle) + tmpY*Math.cos(radianAngle);
         //double newY = circle_radius * Math.sqrt((tmpY*tmpY)/((tmpX*tmpX)+(tmpY*tmpY)));
@@ -195,9 +197,9 @@ public class BugsSpray {
         return ((x-circle_x)*(x-circle_x)+(y-circle_y)*(y-circle_y)
                 > circle_radius*circle_radius);
     }
-    public void shootBullet()
+    public ArrayList<BugsSprayBullet> getBullets()
     {
-
+        return bullets;
     }
     public class BulletShootTask extends AsyncTask<Void, Void, Void> {
 
