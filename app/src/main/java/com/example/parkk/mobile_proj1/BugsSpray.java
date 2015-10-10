@@ -224,5 +224,13 @@ public class BugsSpray {
             }
         }
     }
+    public float getSpray_x()
+    {
+        return spray_x;
+    }
+    public float getSpray_y()
+    {
+        return spray_y;
+    }
 
 }

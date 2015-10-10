@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class GraphicsView extends View{
     private int circle_x;
     private int circle_y;
     private int radius;
+    private boolean isBugCollision = false;
 
     private Context mContext;
 
@@ -167,6 +170,11 @@ public class GraphicsView extends View{
         for(int i = 0 ; i < bugTriangles.size() ; i++){
             bugTriangles.get(i).draw(canvas);
         }
+        //when program is end
+        if(isBugCollision || isAllBugsOut()){
+            Toast.makeText(mContext.getApplicationContext(), "Program END", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         invalidate();
     }
@@ -193,7 +201,7 @@ public class GraphicsView extends View{
         double tmpX = x - circle_x;
         double tmpY = y - circle_y;
         double radianAngle = (double) angleSize *(Math.PI)/180;
-        double newY = tmpX *Math.sin(radianAngle) + tmpY *Math.cos(radianAngle);
+        double newY = tmpX * Math.sin(radianAngle) + tmpY * Math.cos(radianAngle);
         //double newY = circle_radius * Math.sqrt((tmpY*tmpY)/((tmpX*tmpX)+(tmpY*tmpY)));
         return (float)newY + circle_y;
     }
@@ -203,18 +211,21 @@ public class GraphicsView extends View{
             BugsSprayBullet bullet = bulletIterator.next();
             for (Iterator<BugCircle> iterator = bugCircles.iterator(); iterator.hasNext(); ) {
                 BugCircle bug = iterator.next();
+                if(isProgramEnd(bug.getX(), bug.getY()))  isBugCollision = true;
                 if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugRectangle> iterator = bugRectangles.iterator(); iterator.hasNext(); ) {
                 BugRectangle bug = iterator.next();
+                if(isProgramEnd(bug.getX(), bug.getY()))  isBugCollision = true;
                 if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugTriangle> iterator = bugTriangles.iterator(); iterator.hasNext(); ) {
                 BugTriangle bug = iterator.next();
+                if(isProgramEnd(bug.getX(), bug.getY()))  isBugCollision = true;
                 if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
@@ -226,10 +237,22 @@ public class GraphicsView extends View{
                 > radius*radius);
     }
     private boolean isShot(BugsSprayBullet bullet, float x, float y){
-        if(bullet.getX() - x <11 && bullet.getX() -x > -11
-            &&bullet.getY() - y < 11 && bullet.getY() - y > -11) return true;
+        if(bullet.getX() - x <20 && bullet.getX() -x > -20
+            &&bullet.getY() - y < 20 && bullet.getY() - y > -20) return true;
 
         return false;
+    }
+    private boolean isProgramEnd(float bug_x, float bug_y)
+    {
+        if(bugsSpray.getSpray_x() - bug_x <20 && bugsSpray.getSpray_x() -bug_x > -20
+            &&bugsSpray.getSpray_y() - bug_y < 20 && bugsSpray.getSpray_y() - bug_y > -20) return true;
+
+        return false;
+    }
+    private boolean isAllBugsOut()
+    {
+        return (bugCircles.size() == 0 && bugRectangles.size() == 0 && bugTriangles.size() == 0);
+
     }
 
 }
