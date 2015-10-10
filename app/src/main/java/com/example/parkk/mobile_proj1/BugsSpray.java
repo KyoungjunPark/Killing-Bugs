@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by KJPARK on 2015-10-08.
@@ -29,14 +30,20 @@ public class BugsSpray {
 
     private int particles_width;
     private int particles_height;
+
     private int circle_x;
     private int circle_y;
     private int circle_radius;
+
+
     private float spray_x;
     private float spray_y;
 
     private float particle_x;
     private float particle_y;
+
+    private float bullet_x;
+    private float bullet_y;
 
 
     private int currentAngle = 0;
@@ -86,6 +93,11 @@ public class BugsSpray {
             particle_x = newX;
             particle_y = newY;
 
+            newX = getNewSpray_X(bullet_x, bullet_y);
+            newY = getNewSpray_Y(bullet_x, bullet_y);
+            bullet_x = newX;
+            bullet_y = newY;
+
             //rotate spray
             Matrix matrix = new Matrix();
             matrix.postRotate(currentAngle);
@@ -110,6 +122,11 @@ public class BugsSpray {
         if(rotatedParticlesBitmap == null) canvas.drawBitmap(particlesBitmap, particle_x - particles_width/2, particle_y-particles_height/2, new Paint());
         else canvas.drawBitmap(rotatedParticlesBitmap, particle_x - particles_width/2, particle_y -particles_height/2, new Paint());
 
+        //refresh bullets
+        for(Iterator<BugsSprayBullet> iterator = bullets.iterator() ; iterator.hasNext();){
+            BugsSprayBullet bullet = iterator.next();
+            if(isOut(bullet)) iterator.remove();
+        }
         //draw the bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).draw(canvas);
@@ -130,8 +147,11 @@ public class BugsSpray {
         this.spray_x = x;
         this.spray_y = y;
 
-        this.particle_x = x +50;
+        this.particle_x = x +65;
         this.particle_y = y - particles_height/2;
+
+        this.bullet_x = particle_x;
+        this.bullet_y = particle_y + 160;
     }
     public void moveRight()
     {
@@ -167,11 +187,18 @@ public class BugsSpray {
         //double newY = circle_radius * Math.sqrt((tmpY*tmpY)/((tmpX*tmpX)+(tmpY*tmpY)));
         return (float)newY + circle_y;
     }
+    private boolean isOut(BugsSprayBullet bullet)
+    {
+        float x = bullet.getX();
+        float y = bullet.getY();
+
+        return ((x-circle_x)*(x-circle_x)+(y-circle_y)*(y-circle_y)
+                > circle_radius*circle_radius);
+    }
     public void shootBullet()
     {
 
     }
-
     public class BulletShootTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -179,15 +206,16 @@ public class BugsSpray {
             while(true) {
                 //draw the bullet
                 BugsSprayBullet bullet = new BugsSprayBullet(mContext);
-                bullet.setPosition(spray_x + 40, spray_y);
+                bullet.setPosition(bullet_x, bullet_y);
 
                 Matrix matrix = new Matrix();
                 matrix.postRotate(currentAngle);
                 bullet.setRotation(matrix);
+                bullet.setSpeeds(currentAngle);
                 bullets.add(bullet);
 
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(300);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

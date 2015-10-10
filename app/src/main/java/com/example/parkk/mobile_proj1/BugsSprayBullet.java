@@ -19,8 +19,8 @@ public class BugsSprayBullet {
     private float x;
     private float y;
 
-    private float speedX = 0;
-    private float speedY = -10;
+    private double speedX = 0;
+    private double speedY = -10;
 
     private int width;
     private int height;
@@ -43,7 +43,7 @@ public class BugsSprayBullet {
         x += speedX;
         y += speedY;
 
-        canvas.drawBitmap(bulletBitmap, x, y-height/2, new Paint());
+        canvas.drawBitmap(rotatedBulletBitmap, x-width/2, y-height/2, new Paint());
     }
     public void setPosition(float x, float y)
     {
@@ -57,4 +57,16 @@ public class BugsSprayBullet {
         width = rotatedBulletBitmap.getWidth();
         height = rotatedBulletBitmap.getHeight();
     }
+    public void setSpeeds(double angle)
+    {
+        double newX, newY;
+        double radianAngle = angle*(Math.PI)/180;
+        newX = speedX*Math.cos(radianAngle) - speedY*Math.sin(radianAngle);
+        newY = speedX*Math.sin(radianAngle) + speedY*Math.cos(radianAngle);
+
+        this.speedX = newX;
+        this.speedY = newY;
+    }
+    public float getX(){return x;}
+    public float getY(){return y;}
 }
