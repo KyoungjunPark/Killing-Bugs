@@ -69,4 +69,9 @@ public class BugsSprayBullet {
     }
     public float getX(){return x;}
     public float getY(){return y;}
+    public void remove()
+    {
+        bulletBitmap.recycle();
+        rotatedBulletBitmap.recycle();
+    }
 }
