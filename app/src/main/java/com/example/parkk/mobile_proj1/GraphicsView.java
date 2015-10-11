@@ -55,6 +55,9 @@ public class GraphicsView extends View{
 
     private TextView killScoreText;
 
+    private boolean isItemExist = false;
+    private Items item;
+
 
     public GraphicsView(Context context) {
         super(context);
@@ -150,6 +153,7 @@ public class GraphicsView extends View{
                     tmpX = newX;
                     tmpY = newY;
                 }
+                item = new Items(mContext, circle_x, circle_y);
                 getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
@@ -191,14 +195,30 @@ public class GraphicsView extends View{
                 canvas.drawText("MISSION FAILED", circle_x - 670, circle_y, endPaint);
                 return;
             }
-            if (isAllBugsDead()) {
+            if (isAllBugsDead() && !isItemExist) {
                 Toast.makeText(mContext.getApplicationContext(), "STAGE " + (++stage), Toast.LENGTH_LONG).show();
                 programRestart();
             }
             if(bugKillCount % bugKillScale == 0 && bugKillCount != 0){
-                bugKillScale*=2.5;
+                bugKillScale*=4;
                 bugsSpray.upBulletPower();
             }
+
+            if(isItemOut()){
+                item.resetItem(circle_x, circle_y);
+                isItemExist = false;
+            }
+            if(stage %3 == 0 && !isItemExist){
+                item.resetItem(circle_x, circle_y);
+                isItemExist = true;
+            }
+            if(stage %3 == 0 && !isItemCollideWithSpray() && isItemExist){
+                item.draw(canvas);
+            }
+            if(isItemCollideWithSpray()){
+                isItemExist = false;
+            }
+
 
             invalidate();
         }
@@ -261,19 +281,19 @@ public class GraphicsView extends View{
             }
             for (Iterator<BugCircle> iterator = bugCircles.iterator(); iterator.hasNext(); ) {
                 BugCircle bug = iterator.next();
-                if (isParticlesShot(bug.getX(), bug.getY())) {
+                if (isOut(bug.getX(), bug.getY()) || isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugRectangle> iterator = bugRectangles.iterator(); iterator.hasNext(); ) {
                 BugRectangle bug = iterator.next();
-                if (isParticlesShot(bug.getX(), bug.getY())) {
+                if (isOut(bug.getX(), bug.getY()) || isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugTriangle> iterator = bugTriangles.iterator(); iterator.hasNext(); ) {
                 BugTriangle bug = iterator.next();
-                if (isParticlesShot(bug.getX(), bug.getY())) {
+                if (isOut(bug.getX(), bug.getY()) || isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
@@ -405,5 +425,25 @@ public class GraphicsView extends View{
     }
     public void setKillScoreText(TextView textView){
         killScoreText = textView;
+    }
+    private boolean isItemCollideWithSpray(){
+        if((((item.getX() - item.getWidth()/2) < bugsSpray.getSpray_x()) && ((item.getX() + item.getWidth()/2) > bugsSpray.getSpray_x()))
+                && (((item.getY() - item.getHeight()/2) < bugsSpray.getSpray_y()) && ((item.getY() + item.getHeight()/2) > bugsSpray.getSpray_y()))){
+            bugKillCount+= 40;
+            isItemExist = false;
+            Toast.makeText(mContext.getApplicationContext(), "kill Count +40", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
+
+    }
+    private boolean isItemOut()
+    {
+        if((item.getX()-circle_x)*(item.getX()-circle_x)+(item.getY()-circle_y)*(item.getY()-circle_y)
+                > radius*radius){
+            isItemExist = false;
+            return true;
+        }
+        return false;
     }
 }

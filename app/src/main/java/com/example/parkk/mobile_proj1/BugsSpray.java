@@ -288,7 +288,7 @@ public class BugsSpray {
     }
     public boolean isParticlesKill(float x, float y)
     {
-        return ((((particle_x - particles_width/2) < x) && ((particle_x + particles_width/2) > x))
+        return (isParticlesClicked && (((particle_x - particles_width/2) < x) && ((particle_x + particles_width/2) > x))
                 && (((particle_y - particles_height/2) < y) && ((particle_y + particles_height/2) > y)));
 
     }
