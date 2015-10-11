@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class GraphicsView extends View{
     private int circle_x;
     private int circle_y;
     private int radius;
-    private boolean isBugCollision = false;
+    private boolean isBugsOut = false;
     private Context mContext;
 
     Paint endPaint;
@@ -44,6 +46,15 @@ public class GraphicsView extends View{
     private ArrayList<BugTriangle> bugTriangles;
     private int bugTriangleNum;
     private int bugTriangleAngleSize = 0;
+
+    private int stage = 1;
+    private int bugKillCount = 0;
+    private int bugKillScale = 10;
+
+    private boolean isPlaying = true;
+
+    private TextView killScoreText;
+
 
     public GraphicsView(Context context) {
         super(context);
@@ -71,9 +82,9 @@ public class GraphicsView extends View{
         bugRectangles = new ArrayList<>();
         bugTriangles = new ArrayList<>();
 
-        bugCircleNum = 10;
-        bugRectangleNum = 10;
-        bugTriangleNum = 1;
+        bugCircleNum = 2;
+        bugRectangleNum = 2;
+        bugTriangleNum = 2;
 
         bugCircleAngleSize = 360/bugCircleNum;
         bugRectangleAngleSize = 360/bugRectangleNum;
@@ -88,7 +99,6 @@ public class GraphicsView extends View{
             public void onGlobalLayout() {
                 float tmpX, tmpY;
                 float newX, newY;
-
                 int[] location = new int[2];
                 getLocationOnScreen(location);
                 screen_width = getWidth();
@@ -146,49 +156,64 @@ public class GraphicsView extends View{
         /* BugsSpray initialization */
         bugsSpray = new BugsSpray(getContext());
 
+        Toast.makeText(mContext.getApplicationContext(), "STAGE "+stage, Toast.LENGTH_LONG).show();
     }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //circle border
 
-        canvas.drawPath(circle_path, circlePaint);
-        bugsSpray.draw(canvas);
+        if(isPlaying) {
+            canvas.drawPath(circle_path, circlePaint);
+            bugsSpray.draw(canvas);
 
-        //when bugs are out to the circle
-        bugRefresh();
+            //when bugs are out to the circle
+            bugRefresh();
 
-        //draw bugCircles
-        for(int i = 0 ; i < bugCircles.size(); i++){
-            bugCircles.get(i).draw(canvas);
-        }
-        //draw bugRectangles
-        for(int i = 0 ; i < bugRectangles.size() ; i++){
-            bugRectangles.get(i).draw(canvas);
-        }
-        //draw bugTriangles
-        for(int i = 0 ; i < bugTriangles.size() ; i++){
-            bugTriangles.get(i).draw(canvas);
-        }
-        //when program is end
-        if(isSprayCollied() || isAllBugsOut()){
-            Toast.makeText(mContext.getApplicationContext(), "Program END", Toast.LENGTH_LONG).show();
-            endPaint.setColor(Color.RED);
-            endPaint.setTextSize(200);
-            endPaint.setFakeBoldText(true);
-            canvas.drawText("MISSION FAILED", circle_x - 670, circle_y, endPaint);
-            return;
-        }
+            //draw bugCircles
+            for (int i = 0; i < bugCircles.size(); i++) {
+                bugCircles.get(i).draw(canvas);
+            }
+            //draw bugRectangles
+            for (int i = 0; i < bugRectangles.size(); i++) {
+                bugRectangles.get(i).draw(canvas);
+            }
+            //draw bugTriangles
+            for (int i = 0; i < bugTriangles.size(); i++) {
+                bugTriangles.get(i).draw(canvas);
+            }
+            //when program is end
+            if (isSprayCollied() || isBugsOut) {
+                endPaint.setColor(Color.RED);
+                endPaint.setTextSize(200);
+                endPaint.setFakeBoldText(true);
+                isPlaying = false;
+                canvas.drawText("MISSION FAILED", circle_x - 670, circle_y, endPaint);
+                return;
+            }
+            if (isAllBugsDead()) {
+                Toast.makeText(mContext.getApplicationContext(), "STAGE " + (++stage), Toast.LENGTH_LONG).show();
+                programRestart();
+            }
+            if(bugKillCount % bugKillScale == 0 && bugKillCount != 0){
+                bugKillScale*=2.5;
+                bugsSpray.upBulletPower();
+            }
 
-        invalidate();
+            invalidate();
+        }
     }
     public void sprayLeft() {
-        bugsSpray.moveLeft();
-        invalidate();
+        if(isPlaying) {
+            bugsSpray.moveLeft();
+            invalidate();
+        }
     }
     public void sprayRight(){
-        bugsSpray.moveRight();
-        invalidate();
+        if(isPlaying) {
+            bugsSpray.moveRight();
+            invalidate();
+        }
     }
     private float getNewSpray_X(float x, float y, int angleSize)
     {
@@ -211,37 +236,75 @@ public class GraphicsView extends View{
     }
     private void bugRefresh()
     {
-        for(Iterator<BugsSprayBullet> bulletIterator = bugsSpray.getBullets().iterator(); bulletIterator.hasNext();) {
-            BugsSprayBullet bullet = bulletIterator.next();
+        try {
+            for (Iterator<BugsSprayBullet> bulletIterator = bugsSpray.getBullets().iterator(); bulletIterator.hasNext(); ) {
+                BugsSprayBullet bullet = bulletIterator.next();
 
+                for (Iterator<BugCircle> iterator = bugCircles.iterator(); iterator.hasNext(); ) {
+                    BugCircle bug = iterator.next();
+                    if (isOut(bug.getX(), bug.getY()) || isShot(bullet, bug.getX(), bug.getY())) {
+                        iterator.remove();
+                    }
+                }
+                for (Iterator<BugRectangle> iterator = bugRectangles.iterator(); iterator.hasNext(); ) {
+                    BugRectangle bug = iterator.next();
+                    if (isOut(bug.getX(), bug.getY()) || isShot(bullet, bug.getX(), bug.getY())) {
+                        iterator.remove();
+                    }
+                }
+                for (Iterator<BugTriangle> iterator = bugTriangles.iterator(); iterator.hasNext(); ) {
+                    BugTriangle bug = iterator.next();
+                    if (isOut(bug.getX(), bug.getY()) || isShot(bullet, bug.getX(), bug.getY())) {
+                        iterator.remove();
+                    }
+                }
+            }
             for (Iterator<BugCircle> iterator = bugCircles.iterator(); iterator.hasNext(); ) {
                 BugCircle bug = iterator.next();
-                if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
+                if (isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugRectangle> iterator = bugRectangles.iterator(); iterator.hasNext(); ) {
                 BugRectangle bug = iterator.next();
-                if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
+                if (isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
             for (Iterator<BugTriangle> iterator = bugTriangles.iterator(); iterator.hasNext(); ) {
                 BugTriangle bug = iterator.next();
-                if (isOut(bug.getX(), bug.getY()) || isShot(bullet,bug.getX(), bug.getY())) {
+                if (isParticlesShot(bug.getX(), bug.getY())) {
                     iterator.remove();
                 }
             }
+        } catch(java.util.ConcurrentModificationException e){
+            Log.e(TAG, "Update random pattern thread", e);
         }
     }
-
     private boolean isOut(float x, float y){
-        return ((x-circle_x)*(x-circle_x)+(y-circle_y)*(y-circle_y)
-                > radius*radius);
+       if((x-circle_x)*(x-circle_x)+(y-circle_y)*(y-circle_y)
+                > radius*radius){
+           isBugsOut = true;
+           return true;
+       }
+        return false;
     }
     private boolean isShot(BugsSprayBullet bullet, float x, float y){
-        return (bullet.getX() - x <30 && bullet.getX() -x > -30
-            &&bullet.getY() - y < 30 && bullet.getY() - y > -30);
+        if((bullet.getX() - x <30 && bullet.getX() -x > -30
+            &&bullet.getY() - y < 30 && bullet.getY() - y > -30)){
+            bugKillCount++;
+            killScoreText.setText(mContext.getString(R.string.Score, bugKillCount));
+            return true;
+        }
+        return false;
+    }
+    private boolean isParticlesShot(float x, float y){
+        if(bugsSpray.isParticlesKill(x, y)){
+            bugKillCount++;
+            killScoreText.setText(mContext.getString(R.string.Score, bugKillCount));
+            return true;
+        }
+        return false;
     }
     private boolean isSprayCollied()
     {
@@ -265,7 +328,7 @@ public class GraphicsView extends View{
         }
         return false;
     }
-    private boolean isAllBugsOut()
+    private boolean isAllBugsDead()
     {
         return (bugCircles.size() == 0 && bugRectangles.size() == 0 && bugTriangles.size() == 0);
 
@@ -286,5 +349,61 @@ public class GraphicsView extends View{
     {
         bugsSpray.pauseParticles();
     }
+    private void programRestart()
+    {
+        float tmpX, tmpY;
+        float newX, newY;
+        BugCircle bugCircle;
+        BugRectangle bugRectangle;
+        BugTriangle bugTriangle;
 
+        bugCircleNum = 2*stage;
+        bugRectangleNum = 2*stage;
+        bugTriangleNum = 2*stage;
+
+        bugCircleAngleSize = 360/bugCircleNum;
+        bugRectangleAngleSize = 360/bugRectangleNum;
+        bugTriangleAngleSize = 360/bugTriangleNum;
+
+        //Make BugCircles
+        tmpX = circle_x;
+        tmpY = circle_y - radius / 2;
+        for (int i = 0; i < bugCircleNum; i++) {
+            bugCircle = new BugCircle(tmpX, tmpY);
+            bugCircles.add(bugCircle);
+
+            newX = getNewSpray_X(tmpX, tmpY, bugCircleAngleSize);
+            newY = getNewSpray_Y(tmpX, tmpY, bugCircleAngleSize);
+            tmpX = newX;
+            tmpY = newY;
+        }
+        //Make BugRectangles
+        tmpX = circle_x;
+        tmpY = circle_y - radius / 4;
+        for (int i = 0; i < bugRectangleNum; i++) {
+            bugRectangle = new BugRectangle(tmpX, tmpY);
+            bugRectangles.add(bugRectangle);
+
+            newX = getNewSpray_X(tmpX, tmpY, bugRectangleAngleSize);
+            newY = getNewSpray_Y(tmpX, tmpY, bugRectangleAngleSize);
+            tmpX = newX;
+            tmpY = newY;
+        }
+        //Make BugTriangles
+        tmpX = circle_x;
+        tmpY = circle_y - radius / 8;
+        for (int i = 0; i < bugTriangleNum; i++) {
+            bugTriangle = new BugTriangle(tmpX, tmpY);
+            bugTriangles.add(bugTriangle);
+
+            newX = getNewSpray_X(tmpX, tmpY, bugTriangleAngleSize);
+            newY = getNewSpray_Y(tmpX, tmpY, bugTriangleAngleSize);
+            tmpX = newX;
+            tmpY = newY;
+        }
+
+    }
+    public void setKillScoreText(TextView textView){
+        killScoreText = textView;
+    }
 }

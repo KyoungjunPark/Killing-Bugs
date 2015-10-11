@@ -55,7 +55,7 @@ public class BugsSpray {
     private int angleSize = 6;
     private boolean isRotated = false;
 
-    //private Path spray_path;
+    private int bulletPower =1;
 
     private ArrayList<BugsSprayBullet> bullets;
 
@@ -131,10 +131,14 @@ public class BugsSpray {
 
         //refresh bullets
         for(Iterator<BugsSprayBullet> iterator = bullets.iterator() ; iterator.hasNext();){
-            BugsSprayBullet bullet = iterator.next();
-            if(isOut(bullet)) {
-                bullet.remove();
-                iterator.remove();
+            try {
+                BugsSprayBullet bullet = iterator.next();
+                if (isOut(bullet)) {
+                    bullet.remove();
+                    iterator.remove();
+                }
+            } catch (java.util.ConcurrentModificationException e){
+                Log.e(TAG, "ConcurrentModificationException is called", e);
             }
         }
         //draw the bullets
@@ -184,7 +188,6 @@ public class BugsSpray {
 
         double radianAngle = (double)angleSize*(Math.PI)/180;
         double newX = tmpX*Math.cos(radianAngle) - tmpY*Math.sin(radianAngle);
-        //double newX = circle_radius * Math.sqrt((tmpX*tmpX)/((tmpX*tmpX)+(tmpY*tmpY)));
         return (float)newX+ circle_x;
     }
     private float getNewSpray_Y(float x, float y)
@@ -214,14 +217,16 @@ public class BugsSpray {
         protected Void doInBackground(Void... params) {
             while(!isCancelled()) {
                 //draw the bullet
-                BugsSprayBullet bullet = new BugsSprayBullet(mContext);
-                bullet.setPosition(bullet_x, bullet_y);
+                for(int i = 0 ; i < bulletPower ; i++) {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(currentAngle+(i*2));
 
-                Matrix matrix = new Matrix();
-                matrix.postRotate(currentAngle);
-                bullet.setRotation(matrix);
-                bullet.setSpeeds(currentAngle);
-                bullets.add(bullet);
+                    BugsSprayBullet bullet = new BugsSprayBullet(mContext);
+                    bullet.setPosition(bullet_x, bullet_y);
+                    bullet.setRotation(matrix);
+                    bullet.setSpeeds(currentAngle + (i*2));
+                    bullets.add(bullet);
+                }
 
                 try {
                     Thread.sleep(300);
@@ -263,5 +268,28 @@ public class BugsSpray {
     public void pauseParticles()
     {
         isParticlesClicked = false;
+    }
+    public void upBulletPower()
+    {
+        if(bulletPower < 4) bulletPower++;
+        if(bulletPower == 1){
+            particlesBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.spray_particles);
+            particles_width = particlesBitmap.getWidth();
+            particles_height = particlesBitmap.getHeight();
+        } else if(bulletPower == 2){
+            particlesBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.spray_particles_power2);
+            particles_width = particlesBitmap.getWidth();
+            particles_height = particlesBitmap.getHeight();
+        } else if(bulletPower == 3){
+            particlesBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.spray_particles_power3);
+            particles_width = particlesBitmap.getWidth();
+            particles_height = particlesBitmap.getHeight();
+        }
+    }
+    public boolean isParticlesKill(float x, float y)
+    {
+        return ((((particle_x - particles_width/2) < x) && ((particle_x + particles_width/2) > x))
+                && (((particle_y - particles_height/2) < y) && ((particle_y + particles_height/2) > y)));
+
     }
 }

@@ -13,6 +13,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,12 +26,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton rightButton;
     private ImageButton particlesButton;
     private ImageButton bulletButton;
+    private TextView killScoreText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -38,7 +39,13 @@ public class MainActivity extends AppCompatActivity {
         particlesButton = (ImageButton) findViewById(R.id.particlesButton);
         bulletButton = (ImageButton) findViewById(R.id.bulletButton);
 
+        killScoreText = (TextView) findViewById(R.id.killScore);
+        String string = getString(R.string.Score, 0);
+        killScoreText.setText(string);
+
         screen_circle = (GraphicsView) findViewById(R.id.screen_circle);
+
+        screen_circle.setKillScoreText(killScoreText);
 
         leftButton.setOnTouchListener(new RepeatListener(400, 1, new View.OnClickListener() {
             @Override
@@ -55,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
         particlesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isParticlesClicked){
+                if (!isParticlesClicked) {
                     screen_circle.shootParticles();
                     particlesButton.setImageResource(R.drawable.particles_button);
                     isParticlesClicked = true;
-                } else{
+                } else {
                     screen_circle.pauseParticles();
                     particlesButton.setImageResource(R.drawable.particles_button_pressed);
                     isParticlesClicked = false;
@@ -69,11 +76,11 @@ public class MainActivity extends AppCompatActivity {
         bulletButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isBulletClicked) {
+                if (!isBulletClicked) {
                     screen_circle.shootBullet();
                     bulletButton.setImageResource(R.drawable.pill_button);
                     isBulletClicked = true;
-                }else{
+                } else {
                     screen_circle.pauseShootBullet();
                     bulletButton.setImageResource(R.drawable.pill_button_pressed);
                     isBulletClicked = false;

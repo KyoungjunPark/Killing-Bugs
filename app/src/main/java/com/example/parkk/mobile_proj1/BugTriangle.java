@@ -97,7 +97,7 @@ public class BugTriangle {
         peak3X = getNewSpray_X(destX, destY, angle3);
         peak3Y = getNewSpray_Y(destX , destY, angle3);
 
-        pathSegmentNum = 3000;
+        pathSegmentNum = 1300;
         //path.addCircle(x, y, 100, Path.Direction.CCW);
         path.moveTo(x, y);
 

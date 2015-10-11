@@ -5,4 +5,5 @@
     <string name="right_arrow">Right_arrow</string>
     <string name="particles">Particles</string>
     <string name="bullet">Bullet</string>
+    <string name="Score">%1$d KILL</string>
 </resources>
