@@ -20,6 +20,17 @@
         android:background="@android:color/transparent"
         android:id="@+id/leftButton"
         />
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/leftButton"
+        android:layout_toRightOf="@+id/leftButton"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/particles_button_pressed"
+        android:contentDescription="@string/particles"
+        android:background="@android:color/transparent"
+        android:id="@+id/particlesButton"/>
 
     <com.example.parkk.mobile_proj1.GraphicsView
         android:layout_width="match_parent"
@@ -44,6 +55,18 @@
         android:contentDescription="@string/right_arrow"
         android:background="@android:color/transparent"
         android:id="@+id/rightButton"
+        />
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/rightButton"
+        android:layout_toLeftOf="@+id/rightButton"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/pill_button_pressed"
+        android:contentDescription="@string/bullet"
+        android:background="@android:color/transparent"
+        android:id="@+id/bulletButton"
         />
 
 </RelativeLayout>

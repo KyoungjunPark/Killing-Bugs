@@ -82,7 +82,7 @@ public class BugRectangle {
         int angle = (int) (Math.random() * 361);
         float radius, destX, destY, largePeakX, largePeakY;
         radius = 100;
-        pathSegmentNum = 1500;
+        pathSegmentNum = 3000;
 
         destX = getNewSpray_X(radius, 0, angle);
         destY = getNewSpray_Y(radius, 0, angle);

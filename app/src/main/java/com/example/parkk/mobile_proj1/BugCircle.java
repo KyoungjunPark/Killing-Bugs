@@ -88,7 +88,7 @@ public class BugCircle {
         smallPeakX = getNewSpray_X(destX, destY, 90);
         smallPeakY = getNewSpray_Y(destX, destY, 90);
 
-        pathSegmentNum = 1500;
+        pathSegmentNum = 3000;
         //path.addCircle(x, y, 100, Path.Direction.CCW);
         path.moveTo(x, y);
 

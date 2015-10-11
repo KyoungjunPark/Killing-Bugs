@@ -45,6 +45,10 @@ public class BugsSpray {
     private float bullet_x;
     private float bullet_y;
 
+    public boolean isBulletClicked = false;
+    public boolean isParticlesClicked = false;
+
+    private BulletShootTask bulletShoot;
 
     private int currentAngle = 0;
     private int rotateAngle = 0;
@@ -75,7 +79,6 @@ public class BugsSpray {
         bullets = new ArrayList<>();
         //spray_path = new Path();
 
-        new BulletShootTask().execute();
     }
     public void draw(Canvas canvas)
     {
@@ -119,8 +122,12 @@ public class BugsSpray {
         if(rotatedSprayBitmap == null) canvas.drawBitmap(sprayBitmap, spray_x - spray_width / 2, spray_y - spray_height / 2, new Paint());
         else canvas.drawBitmap(rotatedSprayBitmap, spray_x - spray_width / 2, spray_y - spray_height / 2, new Paint());
 
-        if(rotatedParticlesBitmap == null) canvas.drawBitmap(particlesBitmap, particle_x - particles_width/2, particle_y-particles_height/2, new Paint());
-        else canvas.drawBitmap(rotatedParticlesBitmap, particle_x - particles_width/2, particle_y -particles_height/2, new Paint());
+        if(isParticlesClicked) {
+            if (rotatedParticlesBitmap == null)
+                canvas.drawBitmap(particlesBitmap, particle_x - particles_width / 2, particle_y - particles_height / 2, new Paint());
+            else
+                canvas.drawBitmap(rotatedParticlesBitmap, particle_x - particles_width / 2, particle_y - particles_height / 2, new Paint());
+        }
 
         //refresh bullets
         for(Iterator<BugsSprayBullet> iterator = bullets.iterator() ; iterator.hasNext();){
@@ -205,7 +212,7 @@ public class BugsSpray {
 
         @Override
         protected Void doInBackground(Void... params) {
-            while(true) {
+            while(!isCancelled()) {
                 //draw the bullet
                 BugsSprayBullet bullet = new BugsSprayBullet(mContext);
                 bullet.setPosition(bullet_x, bullet_y);
@@ -222,7 +229,15 @@ public class BugsSpray {
                     e.printStackTrace();
                 }
             }
+            return null;
         }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+
+
     }
     public float getSpray_x()
     {
@@ -232,5 +247,21 @@ public class BugsSpray {
     {
         return spray_y;
     }
-
+    public void startShootBullet()
+    {
+        bulletShoot = new BulletShootTask();
+        bulletShoot.execute();
+    }
+    public void pauseShootBullet()
+    {
+        bulletShoot.cancel(true);
+    }
+    public void startParticles()
+    {
+        isParticlesClicked = true;
+    }
+    public void pauseParticles()
+    {
+        isParticlesClicked = false;
+    }
 }

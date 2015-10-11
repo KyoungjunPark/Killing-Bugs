@@ -16,17 +16,28 @@ import android.widget.ImageButton;
 
 public class MainActivity extends AppCompatActivity {
 
+    private GraphicsView screen_circle;
+    private boolean isBulletClicked = false;
+    private boolean isParticlesClicked = false;
     private ImageButton leftButton;
     private ImageButton rightButton;
-    private GraphicsView screen_circle;
+    private ImageButton particlesButton;
+    private ImageButton bulletButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         leftButton = (ImageButton) findViewById(R.id.leftButton);
         rightButton = (ImageButton) findViewById(R.id.rightButton);
+        particlesButton = (ImageButton) findViewById(R.id.particlesButton);
+        bulletButton = (ImageButton) findViewById(R.id.bulletButton);
+
         screen_circle = (GraphicsView) findViewById(R.id.screen_circle);
 
         leftButton.setOnTouchListener(new RepeatListener(400, 1, new View.OnClickListener() {
@@ -41,6 +52,35 @@ public class MainActivity extends AppCompatActivity {
                 screen_circle.sprayRight();
             }
         }));
+        particlesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isParticlesClicked){
+                    screen_circle.shootParticles();
+                    particlesButton.setImageResource(R.drawable.particles_button);
+                    isParticlesClicked = true;
+                } else{
+                    screen_circle.pauseParticles();
+                    particlesButton.setImageResource(R.drawable.particles_button_pressed);
+                    isParticlesClicked = false;
+                }
+            }
+        });
+        bulletButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isBulletClicked) {
+                    screen_circle.shootBullet();
+                    bulletButton.setImageResource(R.drawable.pill_button);
+                    isBulletClicked = true;
+                }else{
+                    screen_circle.pauseShootBullet();
+                    bulletButton.setImageResource(R.drawable.pill_button_pressed);
+                    isBulletClicked = false;
+                }
+
+            }
+        });
     }
 
     @Override
